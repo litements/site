@@ -1,0 +1,77 @@
+site_name: Litements
+site_dir: ./public
+repo_name: litements
+repo_url: https://github.com/litements
+site_description: >-
+  SQLite.
+
+# Copyright
+copyright: Copyright &copy; 2021 Ricardo Ander-Egg Aguilar
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: amber
+  # font: false
+  language: en
+  logo: img/logo.png
+  favicon: img/favicon.ico
+  features:
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+plugins:
+  - search
+  - minify:
+      minify_html: true
+      minify_js: true
+      htmlmin_opts:
+          remove_comments: true
+markdown_extensions:
+  - toc:
+      permalink: true
+  # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
+  - pymdownx.highlight:
+      use_pygments: true
+  # https://squidfunk.github.io/mkdocs-material/reference/formatting/
+  - pymdownx.critic
+  - pymdownx.snippets
+  # https://squidfunk.github.io/mkdocs-material/reference/images/
+  # https://squidfunk.github.io/mkdocs-material/reference/buttons/
+  - attr_list
+  # https://squidfunk.github.io/mkdocs-material/reference/meta-tags/
+  # add meta tags like in hugo
+  - meta
+  # https://squidfunk.github.io/mkdocs-material/reference/content-tabs/
+  - pymdownx.tabbed
+  # - markdown.extensions.codehilite:
+  #     guess_lang: false
+  - markdown_include.include:
+      base_path: docs
+  # https://squidfunk.github.io/mkdocs-material/reference/admonitions/
+  - admonition
+  - codehilite
+  - extra
+  - pymdownx.superfences
+      # custom_fences:
+      # - name: mermaid
+      #   class: mermaid
+      #   format: !!python/name:pymdownx.superfences.fence_div_format ''
+# extra_css:
+#   - css/extra.css 
+# extra_javascript:
+#   - https://unpkg.com/mermaid@8.4.6/dist/mermaid.min.js
+nav:
+  - Introduction: 'index.md'
+extra:
+  social:
+  - icon: fontawesome/brands/github-alt
+    link: https://github.com/litements
+  - icon: fontawesome/brands/discord
+    link: https://discord.com/
+  - icon: fontawesome/brands/twitter
+    link: https://twitter.com/ricardoanderegg
+  - icon: fontawesome/brands/linkedin
+    link: https://www.linkedin.com/in/ricardoanderegg
+  - icon: fontawesome/solid/globe
+    link: https://ricardoanderegg.com
