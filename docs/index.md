@@ -1,6 +1,6 @@
 # Litements
 
-## Sqlite
+## SqLite
 
 **Why?**
 
