@@ -14,7 +14,7 @@ theme:
     accent: amber
   # font: false
   language: en
-  logo: img/logo.png
+  logo: img/litements.png
   favicon: img/favicon.ico
   features:
     - navigation.expand
