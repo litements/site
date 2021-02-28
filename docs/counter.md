@@ -6,7 +6,7 @@
 pip install litecounter
 ```
 
-**IMPORTANT**: This package uses SQLite's [UPSERT](https://sqlite.org/lang_upsert.html) statment so it needs to run at least with SQLite version 3.24.0 (released 2018-06-04).
+**IMPORTANT**: This module uses SQLite's [UPSERT](https://sqlite.org/lang_upsert.html) statment so it needs to run at least with SQLite version 3.24.0 (released 2018-06-04).
 
 If you need to run the latest version, with Python you can use [pysqlite3](https://github.com/coleifer/pysqlite3) and override `sqlite3`
 
