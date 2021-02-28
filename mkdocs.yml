@@ -10,8 +10,8 @@ copyright: Copyright &copy; 2021 Ricardo Ander-Egg Aguilar
 theme:
   name: material
   palette:
-    primary: blue
-    accent: amber
+    primary: orange
+    accent: light blue
   # font: false
   language: en
   logo: img/litements.png
@@ -63,6 +63,10 @@ markdown_extensions:
 #   - https://unpkg.com/mermaid@8.4.6/dist/mermaid.min.js
 nav:
   - Introduction: 'index.md'
+  - Queue: 'queue.md'
+  - Dictionary: 'dictionary.md'
+  - Counter: 'counter.md'
+  - Cache: 'cache.md'
 extra:
   social:
   - icon: fontawesome/brands/github-alt
