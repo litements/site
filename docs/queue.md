@@ -88,7 +88,7 @@ for _ in range(3):
 assert q.pop() is None
 ```
 
-Now we will insert 4 more messages. The last message returns `8`. That means the last message inserted has a `rowid` of `8`. The we will `pop()` a message and save it in a variable called `task`. The tasks are returned as dictionaries.
+Now we will insert 4 more messages. The last message returns `8`. That means the last message inserted has a `rowid` of `8`. Then we will `pop()` a message and save it in a variable called `task`. The tasks are returned as dictionaries.
 
 ```python
 q.put("hello")
@@ -105,7 +105,7 @@ assert task["message"] == "hello"
 
 ### Peek a message
 
-With the `q.peek()` method you can have a look at the next message to be processed. The method will return the message, but it won't `pop` it from the queue. Since we have already popped tehe `"hello"` message, the `peek()` method will return the `"world"` message.
+With the `q.peek()` method you can have a look at the next message to be processed. The method will return the message, but it won't `pop` it from the queue. Since we have already popped the `"hello"` message, the `peek()` method will return the `"world"` message.
 
 ```
 q.peek()
