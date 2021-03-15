@@ -8,7 +8,7 @@ pip install litequeue
 
 ## Use cases
 
-You can use this to implement a persistent queue. It also has timing metrics for the tasks, and the api to set a task as done lets you specifiy the `task_id` to be set as done.
+You can use this to implement a persistent queue. It also has timing metrics for the messages, and the api to set a message as done lets you specifiy the `message_id` to be set as done.
 
 Since it's all based on SQLite / SQL, it is easily extendable.
 
@@ -17,15 +17,15 @@ Tasks/messages are always passed as strings, so you can use json data as message
 ## Differences with a normal Python `queue.Queue`
 
 * Persistence
-* Different API to set tasks as done (you tell it which `task_id` to set as done)
-* Timing metrics. As long as tasks are still in the queue or not pruned, you can see how long they have been there or how long they took to finish.
+* Different API to mark messages as done (you tell it which `message_id ` to set as done)
+* Timing metrics. As long as messages are still in the queue or not pruned, you can see how long they have been there or how long they took to finish.
 * Easy to extend using SQL
 * Messages/elements/tasks in the queue are always strings
 
 ## Messages data
 
 * message (text): the message itself, it must be a string
-* task_id (text): a random string ID generated when the message is put in the queue.
+* message_id (text): a random string ID generated when the message is put in the queue.
 * status (int): status of the message. 0 = free, 1 = locked (the message is being processed), 2 = done (the message has been processed and it can be deleted).
 * in_time (int): the [unix epoch time](https://en.wikipedia.org/wiki/Unix_time) when the message was inserted in the queue
 * lock_time (int): the unix epoch time when the message was locked for processing
@@ -33,13 +33,13 @@ Tasks/messages are always passed as strings, so you can use json data as message
 
 ## Architecture
 
-SQLite does not have row-level locks, so we can't use the pattern like `SELECT ... FOR UPDATE SKIP LOCKED`. The current `litequeue` implementation locks a message first and returns it. Then the application is responsible of setting it as done. The problem with this approach is that the application could crash while processing the message/task, so it would stay locked forever. The messages table has an `in_time` and `lock_time` columns (both are Unix epochs). To counter the lock + crash problem, some logic could be implemented like:
+SQLite does not have row-level locks, so we can't use the pattern like `SELECT ... FOR UPDATE SKIP LOCKED`. The current `litequeue` implementation marks a message as locked first and then returns it. The application is responsible of setting it as done. The problem with this approach is that the application could crash while processing the message/task, so it would stay marked locked forever. The messages table has an `in_time` and `lock_time` columns (both are Unix epochs). To counter the lock + crash problem, some logic could be implemented like:
 
 ```
 time_locked = in_time - lock_time
 
 if time_locked > threshhold:
-	delete/edit/modify task
+	delete/modify/add_again ( message )
 ```
 
 With that pattern you can check all the tasks that have been locked for more than `X` seconds and do whatever you need with them.
@@ -64,11 +64,11 @@ q.put("bar")
 
 ### Pop messages
 
-Now we can use the `q.pop()` method to retrieve the next message. For each message, a random `task_id` will be generated on creation. The `.pop()` method returns a dictionary with the message's data.
+Now we can use the `q.pop()` method to retrieve the next message. For each message, a random `message_id` will be generated on creation. The `.pop()` method returns a dictionary with the message's data.
 
 ```python
 q.pop()
-# {'message': 'hello', 'task_id': '7da620ac542acd76c806dbcf00218426', ...}
+# {'message': 'hello', 'message_id': '7da620ac542acd76c806dbcf00218426', ...}
 ```
 
 ### Printing the queue
@@ -84,7 +84,7 @@ print(q)
 #      'lock_time': 1612711137,
 #      'message': 'hello',
 #      'status': 1,
-#      'task_id': '7da620ac542acd76c806dbcf00218426'},
+#      'message_id': '7da620ac542acd76c806dbcf00218426'},
 #       ...
 ```
 
@@ -125,7 +125,7 @@ q.peek()
 
 
 #    {'message': 'world',
-#     'task_id': '44cbc85f12b62891aa596b91f14183e5',
+#     'message_id': '44cbc85f12b62891aa596b91f14183e5',
 #     'status': 0,
 #     'in_time': 1612711138,
 #     'lock_time': None,
@@ -139,28 +139,28 @@ assert q.peek()["message"] == "world"
 assert q.peek()["status"] == 0
 ```
 
-Now we'll go back to the the task we previously popped from the queue. We will mark it as done with the `q.done(task_id)` method. After that, we can use the `q.get(task_id)` method to check it has been marked as done (`'status' = 2`)
+Now we'll go back to the the message we previously popped from the queue. We will mark it as done with the `q.done(message_id)` method. After that, we can use the `q.get(message_id)` method to check it has been marked as done (`'status' = 2`)
 
 ```
-task["message"], task["task_id"]
+task["message"], task["message_id"]
 
 # ('hello', 'c9b9ef76e3a77cc66dd749d485613ec1')
 
-q.done(task["task_id"])
+q.done(task["message_id"])
 
 # 8 <- ID of the last row modified
 
-q.get(task["task_id"])
+q.get(task["message_id"])
 
 #    {'message': 'hello',
-#     'task_id': 'c9b9ef76e3a77cc66dd749d485613ec1',
+#     'message_id': 'c9b9ef76e3a77cc66dd749d485613ec1',
 #     'status': 2,   						<---- status is now 2 (DONE)
 #     'in_time': 1612711138,
 #     'lock_time': 1612711138,
 #     'done_time': 1612711138}
 
 
-already_done = q.get(task["task_id"])
+already_done = q.get(task["message_id"])
 
 # stauts = 2 = done
 assert already_done["status"] == 2
@@ -178,7 +178,7 @@ done_time = already_done["done_time"]
 assert done_time >= lock_time >= in_time
 
 print(
-    f"Task {already_done['task_id']} took {done_time - lock_time} seconds to get done and was in the queue for {done_time - in_time} seconds"
+    f"Task {already_done['message_id']} took {done_time - lock_time} seconds to get done and was in the queue for {done_time - in_time} seconds"
 )
 
 # Task c9b9ef76e3a77cc66dd749d485613ec1 took 0 seconds to get done and was in the queue for 0 seconds
@@ -194,12 +194,12 @@ To removed the messages marked as done (`'status' = 2`), use the `q.prune()` met
 assert q.qsize() == 7
 
 next_one_msg = q.peek()["message"]
-next_one_id = q.peek()["task_id"]
+next_one_id = q.peek()["message_id"]
 
 task = q.pop()
 
 assert task["message"] == next_one_msg
-assert task["task_id"] == next_one_id
+assert task["message_id"] == next_one_id
 
 # remove finished items
 q.prune()
@@ -212,19 +212,19 @@ print(q)
 #      'lock_time': 1612711137,
 #      'message': 'hello',
 #      'status': 1,
-#      'task_id': '7da620ac542acd76c806dbcf00218426'},
+#      'message_id': '7da620ac542acd76c806dbcf00218426'},
 #     {'done_time': None,
 #      'in_time': 1612711137,
 #      'lock_time': 1612711137,
 #      'message': 'world',
 #      'status': 1,
-#      'task_id': 'a593292cfc8d2f3949eab857eafaf608'},
+#      'message_id': 'a593292cfc8d2f3949eab857eafaf608'},
 #     {'done_time': None,
 #      'in_time': 1612711137,
 #      'lock_time': 1612711137,
 #      'message': 'foo',
 #      'status': 1,
-#      'task_id': '17e843a29770df8438ad72bbcf059bf5'},
+#      'message_id': '17e843a29770df8438ad72bbcf059bf5'},
 #     ...
 ```
 
@@ -270,7 +270,7 @@ When we `pop` and item we can add another one. Take into account that `q.put()` 
 q.pop()
 
 #    {'message': 'aktabyjadzrsohlitnei',
-#     'task_id': '08b201c31099a296ef37f23b5257e5b6'}
+#     'message_id': '08b201c31099a296ef37f23b5257e5b6'}
 
 # Now we can put another message without error
 q.put("hello")
@@ -354,7 +354,7 @@ q.put(random_string(20))
 assert q.conn.isolation_level is None
 ```
 
-Creating, popping and setting tasks as done.
+Creating, popping and setting messages as done.
 
 
 ```python
@@ -386,7 +386,7 @@ q.put(tid)
 
 task = q.pop()
 
-q.done(task["task_id"])
+q.done(task["message_id"])
 
 # 80.2 µs ± 4.02 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
 ```
