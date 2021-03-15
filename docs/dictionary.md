@@ -8,11 +8,11 @@ pip install litedict
 
 ## Use cases
 
-You can use this to implement a persistent dictionary. It also uses some SQLite functions to enable getting keys using pattern matching (see examples). Values are JSON encoded before being saved, the underlying database uses a `TEXT`column for the values. The enconder/decoder can be overriden to use the pickle module and convert the objects to bytes and then to and hex string. The reason for this is that these SQLite structures are not meant to be used from wherever you want, not just Python. By having the values as JSON strings, it's easier to interact with the database from different applications using different programming languages.
+You can use this to implement a persistent dictionary. It also uses some SQLite functions to enable getting keys using pattern matching (see examples). Values are JSON encoded before being saved, the underlying database uses a `TEXT`column for the values. The encoder/decoder can be overridden to use the pickle module and convert the objects to bytes and then to and hex string. The reason for this is that these SQLite structures are not meant to be used from wherever you want, not just Python. By having the values as JSON strings, it's easier to interact with the database from different applications using different programming languages.
 
 ## Examples
 
-Initalize dictionary and set up 2 key names.
+Initialize dictionary and set up 2 key names.
 
 
 ```python
@@ -36,7 +36,7 @@ del d[TEST_1]
 assert d.get(TEST_1, None) is None
 ```
 
-Values are JSON encoded before being saved, so you can store numbers normally and operate as if they were numbers. You don't have to worry abount parsing the `string` as an `int`, the values are encoded/decoded internally.
+Values are JSON encoded before being saved, so you can store numbers normally and operate as if they were numbers. You don't have to worry about parsing the `string` as an `int`, the values are encoded/decoded internally.
 
 ## Pattern matching
 
@@ -64,9 +64,9 @@ You can pass both functions during the initialization. Make sure they return a s
 import pickle
 
 d = SQLDict(
-    ":memory:",
-    encoder=lambda x: pickle.dumps(x).hex(),
-    decoder=lambda x: pickle.loads(bytes.fromhex(x)),
+    ":memory:",
+    encoder=lambda x: pickle.dumps(x).hex(),
+    decoder=lambda x: pickle.loads(bytes.fromhex(x)),
 )
 ```
 
@@ -84,23 +84,23 @@ import json
 
 
 def random_string(string_length=10, fuzz=False, space=False):
-    """Generate a random string of fixed length """
-    letters = ascii_lowercase
-    letters = letters + " " if space else letters
-    if fuzz:
-        letters = printable
-    return "".join(choice(letters) for i in range(string_length))
+    """Generate a random string of fixed length """
+    letters = ascii_lowercase
+    letters = letters + " " if space else letters
+    if fuzz:
+        letters = printable
+    return "".join(choice(letters) for i in range(string_length))
 ```
 
 **Pickle**
 
-Enconding values with `pickle.dumps()` and converting the bytes output to and hexadecimal string.
+Encoding values with `pickle.dumps()` and converting the bytes output to and hexadecimal string.
 
 ```python
 d = SQLDict(
-    ":memory:",
-    encoder=lambda x: pickle.dumps(x).hex(),
-    decoder=lambda x: pickle.loads(bytes.fromhex(x)),
+    ":memory:",
+    encoder=lambda x: pickle.dumps(x).hex(),
+    decoder=lambda x: pickle.loads(bytes.fromhex(x)),
 )
 
 gc.collect()
@@ -118,25 +118,25 @@ d.get(random_string(8), None)
 
 ```python
 d = SQLDict(
-    ":memory:",
-    encoder=lambda x: pickle.dumps(x).hex(),
-    decoder=lambda x: pickle.loads(bytes.fromhex(x)),
+    ":memory:",
+    encoder=lambda x: pickle.dumps(x).hex(),
+    decoder=lambda x: pickle.loads(bytes.fromhex(x)),
 )
 
 gc.collect()
 
 class C:
-    def __init__(self, x):
-        self.x = x
+    def __init__(self, x):
+        self.x = x
 
-    def pp(self):
-        return x
+    def pp(self):
+        return x
 
-    def f(self):
-        def _f(y):
-            return y * self.x ** 2
+    def f(self):
+        def _f(y):
+            return y * self.x ** 2
 
-        return _f
+        return _f
 
 # %%timeit -n20000 -r10
 
@@ -153,9 +153,9 @@ Do not do any encoding/encoding. This requires all values to be strings before b
 
 ```python
 d = SQLDict(
-    ":memory:",
-    encoder=lambda x: x,
-    decoder=lambda x: x,
+    ":memory:",
+    encoder=lambda x: x,
+    decoder=lambda x: x,
 )
 
 gc.collect()
@@ -171,13 +171,13 @@ d.get(random_string(8), None)
 
 **JSON**
 
-This is the **default** enconder.
+This is the **default** encoder.
 
 ```python
 d = SQLDict(
-    ":memory:",
-    encoder=lambda x: json.dumps(x),
-    decoder=lambda x: json.loads(x),
+    ":memory:",
+    encoder=lambda x: json.dumps(x),
+    decoder=lambda x: json.loads(x),
 )
 
 gc.collect()
