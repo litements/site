@@ -125,5 +125,5 @@ for key in ["foo", "bar", "baz", "foobar", "asd", TEST_1]:
 
 print(counter)
 
-# SQLCounter(dbname=':memory:', items=[('key_test_2', 80), ('foo', 8), ('baz', 5), ('foobar', 6), ('key_test_1', 10)])
+# SQLCounter(Connection='sqlite3.Connection(...)', items=[('key_test_2', 80), ('foo', 8), ('baz', 5), ('foobar', 6), ('key_test_1', 10)])
 ```

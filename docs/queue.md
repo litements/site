@@ -31,6 +31,19 @@ Tasks/messages are always passed as strings, so you can use json data as message
 * lock_time (int): the unix epoch time when the message was locked for processing
 * done_time (int): the unix epoch time when the message was marked as done/processed
 
+## Architecture
+
+SQLite does not have row-level locks, so we can't use the pattern like `SELECT ... FOR UPDATE SKIP LOCKED`. The current `litequeue` implementation locks a message first and returns it. Then the application is responsible of setting it as done. The problem with this approach is that the application could crash while processing the message/task, so it would stay locked forever. The messages table has an `in_time` and `lock_time` columns (both are Unix epochs). To counter the lock + crash problem, some logic could be implemented like:
+
+```
+time_locked = in_time - lock_time
+
+if time_locked > threshhold:
+	delete/edit/modify task
+```
+
+With that pattern you can check all the tasks that have been locked for more than `X` seconds and do whatever you need with them.
+
 ## Examples
 
 Initialize a queue and put 4 messages. Each time you put a message in the queue, it returns the `rowid` of the message you just inserted.
@@ -66,7 +79,7 @@ The queue object implements a `__repr__` method, so you can use `print(q)` to ch
 print(q)
 
 
-#    SQLQueue(dbname=':memory:', items=[{'done_time': None,
+#    SQLQueue(Connection='sqlite3.Connection(...)', items=[{'done_time': None,
 #      'in_time': 1612711137,
 #      'lock_time': 1612711137,
 #      'message': 'hello',
@@ -194,7 +207,7 @@ q.prune()
 print(q)
 
 
-#    SQLQueue(dbname=':memory:', items=[{'done_time': None,
+#    SQLQueue(Connection='sqlite3.Connection(...)', items=[{'done_time': None,
 #      'in_time': 1612711137,
 #      'lock_time': 1612711137,
 #      'message': 'hello',
@@ -377,6 +390,10 @@ q.done(task["task_id"])
 
 # 80.2 µs ± 4.02 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
 ```
+
+## Disclaimer
+
+I'm still designing the internal structure of litequeue, the messages metadata and how they are created / locked / deleted, so changes can be expected. However, the main functionality and the exposed API of `put()` / `pop()` / `done()` / `get()` should stay the same. The changes will be mostly internal or adding new methods to the queue. Feedback is welcome!
 
 ## Alternatives
 

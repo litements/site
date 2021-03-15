@@ -8,7 +8,7 @@ pip install litedict
 
 ## Use cases
 
-You can use this to implement a persistent dictionary. It also uses some SQLite functions to enable getting keys using pattern matching (see examples). Values are JSON encoded before being saved, the underlying database uses a `TEXT`column for the values. The enconder/decoder can be overriden to use the pickle module and convert the objects to bytes and then to and hex string. The reason for this is that these SQLite structures are not meant to be used from wherever you want, not just Python. By having the values as JSON strings, it's easier to interact with the database from different programs using different programming languages.
+You can use this to implement a persistent dictionary. It also uses some SQLite functions to enable getting keys using pattern matching (see examples). Values are JSON encoded before being saved, the underlying database uses a `TEXT`column for the values. The enconder/decoder can be overriden to use the pickle module and convert the objects to bytes and then to and hex string. The reason for this is that these SQLite structures are not meant to be used from wherever you want, not just Python. By having the values as JSON strings, it's easier to interact with the database from different applications using different programming languages.
 
 ## Examples
 

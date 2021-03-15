@@ -17,7 +17,7 @@ For example, one of the modules implement a queue you can use for message passin
 ## Other info
 
 * The modules are designed to work with string data (for example queue messages will always be strings). In some cases the encoding/decoding can be modified.
-* The different structures create a database table if it does no exist, and modify some siettings to make it as performant as possible. With that in mind, you can have both the [counter](/counter) and the [queue](/queue) module use the same database file.
+* The different structures create a database table if it does no exist, and modify some settings to make it as performant as possible. With that in mind, you can have both the [counter](/counter) and the [queue](/queue) module use the same database file.
 
 ## Performance settings
 
@@ -33,15 +33,9 @@ Check the SQLite docs to learn more about those settings.
 
 Some modules use SQLite functions that are only available in new versions, so it's recommended to run a modern SQLite version (at least version 3.24.0, released 2018-06-04). Many systems come with a default SQLite installation that is a bit outdated.
 
-In Python you can use [pysqlite3](https://github.com/coleifer/pysqlite3) and override `sqlite3`
+In Python you can use [pysqlite3](https://github.com/coleifer/pysqlite3).
 
-```python
-import pysqlite3 # pre-built if you install pysqlite3-binary
-import sys
-sys.modules['sqlite3'] = pysqlite3 
-```
-
-In near releases you will be able to use a `Connection` to initialize the different modules, so you won't need to override `sqlite3` globally.
+All the modules accept either a filename or an already created sqlite connection. Apart from that, if you have pysqlite3 installed it will use that instead of the sqlite3 module from the standard library.
 
 In other compiled programming languages, the sqlite libraries usually give you the option to compile with a specific sqlite version.
 
