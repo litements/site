@@ -2,7 +2,7 @@
 
 ## What
 
-Litements is a set of structures/components built on top of SQLite, each of those is called a module inside the docs. Currently, there's a [queue](/queue), a [dictionary](/dictionary) and a [counter](/counter), but more modules are coming. Each module/package is installed separately.
+Litements is a set of structures/components built on top of **SQLite**, each of those is called a module inside the docs. Currently, there's a [queue](/queue), a [dictionary](/dictionary) and a [counter](/counter), but more modules are coming. Each module/package is installed separately.
 
 ## Why
 
