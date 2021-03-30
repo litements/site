@@ -56,6 +56,30 @@ assert d.glob("key_test_?") == ["asdfoobar", "foobarasd"]
 assert d.glob("key_tes[tx]*") == ["asdfoobar", "foobarasd", "barasdfoo"]
 ```
 
+## Transactions
+
+We can use this to wrap multiple key operations inside a transaction and make sure all of them execute atomically.
+
+```python
+with d.transaction():
+    d["asd"] = "efg"
+    d["foo"] = "bar"
+    assert d.conn.in_transaction
+
+try:
+    with d.transaction():
+        d["failed"] = "no"
+
+        assert d.conn.in_transaction
+
+        raise Exception
+        # the transaction will now rollback
+        # and undo the operation
+except:
+    # check the transaction succesfully rolled back
+    assert d.get("failed") is None
+```
+
 ## Use a custom encoder/decoder
 
 You can pass both functions during the initialization. Make sure they return a string.
