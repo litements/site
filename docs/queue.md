@@ -16,20 +16,20 @@ Tasks/messages are always passed as strings, so you can use JSON data as message
 
 ## Differences with a normal Python `queue.Queue`
 
-* Persistence
-* Different API to mark messages as done (you tell it which `message_id ` to set as done)
-* Timing metrics. As long as messages are still in the queue or not pruned, you can see how long they have been there or how long they took to finish.
-* Easy to extend using SQL
-* Messages/elements/tasks in the queue are always strings
+- Persistence
+- Different API to mark messages as done (you tell it which `message_id ` to set as done)
+- Timing metrics. As long as messages are still in the queue or not pruned, you can see how long they have been there or how long they took to finish.
+- Easy to extend using SQL
+- Messages/elements/tasks in the queue are always strings
 
 ## Messages data
 
-* message (text): the message itself, it must be a string
-* message_id (text): a random string ID generated when the message is put in the queue.
-* status (int): status of the message. 0 = free, 1 = locked (the message is being processed), 2 = done (the message has been processed, and it can be deleted).
-* in_time (int): the [Unix epoch time](https://en.wikipedia.org/wiki/Unix_time) when the message was inserted in the queue
-* lock_time (int): the Unix epoch time when the message was locked for processing
-* done_time (int): the Unix epoch time when the message was marked as done/processed
+- message (text): the message itself, it must be a string
+- message_id (text): a random string ID generated when the message is put in the queue.
+- status (int): status of the message. 0 = free, 1 = locked (the message is being processed), 2 = done (the message has been processed, and it can be deleted).
+- in_time (int): the [Unix epoch time](https://en.wikipedia.org/wiki/Unix_time) when the message was inserted in the queue
+- lock_time (int): the Unix epoch time when the message was locked for processing
+- done_time (int): the Unix epoch time when the message was marked as done/processed
 
 ## Architecture
 
@@ -252,7 +252,6 @@ assert q.qsize() == 50
 
 An error is raised when the queue has reached its size limit.
 
-
 ```python
 import sqlite3
 
@@ -295,13 +294,11 @@ assert q2.empty() == True
 
 Inserting items in the queue.
 
-
 ```python
 import gc
 ```
 
 In-memory SQL queue
-
 
 ```python
 q = SQLQueue(":memory:", maxsize=None)
@@ -319,9 +316,7 @@ q.qsize()
 # 70000
 ```
 
-
 Standard python queue.
-
 
 ```python
 from queue import Queue
@@ -339,7 +334,6 @@ q.put(random_string(20))
 
 Persistent SQL queue
 
-
 ```python
 q = SQLQueue("test.queue", maxsize=None)
 
@@ -355,7 +349,6 @@ assert q.conn.isolation_level is None
 ```
 
 Creating, popping and setting messages as done.
-
 
 ```python
 q = Queue()
@@ -391,10 +384,73 @@ q.done(task["message_id"])
 # 80.2 µs ± 4.02 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
 ```
 
+## SQLite version `3.35.0`
+
+SQLite introduced the RETURNING clause in version `3.35.0`. If the SQLite used in you application supports it, the `RETURNING` clause will be used. The RETURNING clause makes message `pop`'ing a lot faster:
+
+```python
+from litequeue import SQLQueue
+import gc
+
+from string import ascii_lowercase, printable
+from random import choice
+
+
+def random_string(string_length=10, fuzz=False, space=False):
+    """Generate a random string of fixed length"""
+    letters = ascii_lowercase
+    letters = letters + " " if space else letters
+    if fuzz:
+        letters = printable
+    return "".join(choice(letters) for i in range(string_length))
+
+q = SQLQueue("pop_bench.db", maxsize=None)
+
+###
+# RETURNING
+###
+q.pop = q._pop_returning
+
+gc.collect()
+
+for _ in range(10000):
+    tid = random_string(60)
+
+    q.put(tid)
+
+# benchmark block
+for _ in range(8000):
+    task = q.pop()
+
+# time: 2.15 s
+
+
+q = SQLQueue("pop_bench.db", maxsize=None)
+
+###
+# custom locking logic in a transaction
+###
+q.pop = q._pop_transaction
+
+gc.collect()
+
+for _ in range(10000):
+    tid = random_string(60)
+
+    q.put(tid)
+
+
+# benchmark block
+for _ in range(8000):
+    task = q.pop()
+
+# time: 9.08 s
+```
+
 ## Disclaimer
 
 I'm still designing the internal structure of litequeue, the messages metadata and how they are created / locked / deleted, so changes can be expected. However, the main functionality and the exposed API of `put()` / `pop()` / `done()` / `get()` should stay the same. The changes will be mostly internal or adding new methods to the queue. Feedback is welcome!
 
 ## Alternatives
 
-* [Huey](https://github.com/coleifer/huey): Huey is a task queue implemented in Python, with multiple backends (Redis/SQLite/in-memory). Huey is a more "complete" task queue, it includes a lot of functionality that is missing from `litequeue`. The scope of Huey is much bigger, it lets you decorate functions, run tasks periodically, etc. `litequeue` tries to "just" be a primitive queue implementation on which to build other tools. Even though it's written in Python, `litequeue` is easy to port to other programming languages and have multiple processes interact with the same persistent queue.
+- [Huey](https://github.com/coleifer/huey): Huey is a task queue implemented in Python, with multiple backends (Redis/SQLite/in-memory). Huey is a more "complete" task queue, it includes a lot of functionality that is missing from `litequeue`. The scope of Huey is much bigger, it lets you decorate functions, run tasks periodically, etc. `litequeue` tries to "just" be a primitive queue implementation on which to build other tools. Even though it's written in Python, `litequeue` is easy to port to other programming languages and have multiple processes interact with the same persistent queue.
