@@ -26,7 +26,7 @@ plugins:
       minify_html: true
       minify_js: true
       htmlmin_opts:
-          remove_comments: true
+        remove_comments: true
 markdown_extensions:
   - toc:
       permalink: true
@@ -53,29 +53,28 @@ markdown_extensions:
   - codehilite
   - extra
   - pymdownx.superfences
-      # custom_fences:
-      # - name: mermaid
-      #   class: mermaid
-      #   format: !!python/name:pymdownx.superfences.fence_div_format ''
+    # custom_fences:
+    # - name: mermaid
+    #   class: mermaid
+    #   format: !!python/name:pymdownx.superfences.fence_div_format ''
 # extra_css:
-#   - css/extra.css 
+#   - css/extra.css
 # extra_javascript:
 #   - https://unpkg.com/mermaid@8.4.6/dist/mermaid.min.js
 nav:
-  - Introduction: 'index.md'
-  - Queue: 'queue.md'
-  - Dictionary: 'dictionary.md'
-  - Counter: 'counter.md'
-  - Cache: 'cache.md'
+  - Introduction: "index.md"
+  - Queue: "queue.md"
+  - Dictionary: "dictionary.md"
+  - Counter: "counter.md"
 extra:
   social:
-  - icon: fontawesome/brands/github-alt
-    link: https://github.com/litements
-  - icon: fontawesome/brands/discord
-    link: https://discord.com/
-  - icon: fontawesome/brands/twitter
-    link: https://twitter.com/ricardoanderegg
-  - icon: fontawesome/brands/linkedin
-    link: https://www.linkedin.com/in/ricardoanderegg
-  - icon: fontawesome/solid/globe
-    link: https://ricardoanderegg.com
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/litements
+    - icon: fontawesome/brands/discord
+      link: https://discord.com/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/ricardoanderegg
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/ricardoanderegg
+    - icon: fontawesome/solid/globe
+      link: https://ricardoanderegg.com
